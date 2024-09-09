@@ -129,7 +129,12 @@ class StageOffsetSubState extends HaxeUISubState
   {
     if (char != null && char.shader == outlineShader) char.shader = null;
 
-    var proptemp:FlxSprite = cast PlayState.instance.currentStage.getNamedProp(propName);
+    var proptemp:FlxSprite = null;
+    @:privateAccess //idk to get Character or Props :/
+    if(PlayState.instance.currentStage.namedProps.exists(propName))
+        proptemp = cast PlayState.instance.currentStage.getCharacter(propName);
+    else if(PlayState.instance.currentStage.namedProps.exists(propName))
+        proptemp = cast PlayState.instance.currentStage.getNamedProp(propName);
 
     if (proptemp == null) return;
 
