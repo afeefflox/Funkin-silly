@@ -1,6 +1,6 @@
 # Friday Night Funkin'  but backport
 
-Well it FNF backport 0.4.1 stuff (since new version  has lot of buggy so I'm bored :/ it not base game source code it new Haxeflixel version problem I guess)
+Well it FNF backport 0.4.1 stuff (since new version  has lot of buggy so I'm bored :/ it not base game fault source code it new Haxeflixel version problem I guess)
 
 This game was made with love to Newgrounds and its community. Extra love to Tom Fulp.
 
