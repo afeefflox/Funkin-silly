@@ -51,6 +51,7 @@ class PauseSubState extends MusicBeatSubState
     {text: 'Restart Song', callback: restartPlayState},
     {text: 'Change Difficulty', callback: switchMode.bind(_, Difficulty)},
     {text: 'Enable Practice Mode', callback: enablePracticeMode, filter: () -> !(PlayState.instance?.isPracticeMode ?? false)},
+    {text: 'Options', callback: openOptions},
     {text: 'Exit to Menu', callback: quitToMenu},
   ];
 
@@ -60,6 +61,7 @@ class PauseSubState extends MusicBeatSubState
   static final PAUSE_MENU_ENTRIES_CHARTING:Array<PauseMenuEntry> = [
     {text: 'Resume', callback: resume},
     {text: 'Restart Song', callback: restartPlayState},
+    {text: 'Options', callback: openOptions},
     {text: 'Return to Chart Editor', callback: quitToChartEditor},
   ];
 
@@ -78,6 +80,7 @@ class PauseSubState extends MusicBeatSubState
     {text: 'Resume', callback: resume},
     {text: 'Skip Cutscene', callback: skipVideoCutscene},
     {text: 'Restart Cutscene', callback: restartVideoCutscene},
+    {text: 'Options', callback: openOptions},
     {text: 'Exit to Menu', callback: quitToMenu},
   ];
 
@@ -88,6 +91,7 @@ class PauseSubState extends MusicBeatSubState
     {text: 'Resume', callback: resume},
     {text: 'Restart Dialogue', callback: restartConversation},
     {text: 'Skip Dialogue', callback: skipConversation},
+    {text: 'Options', callback: openOptions},
     {text: 'Exit to Menu', callback: quitToMenu},
   ];
 
@@ -665,6 +669,14 @@ class PauseSubState extends MusicBeatSubState
   static function restartPlayState(state:PauseSubState):Void
   {
     PlayState.instance.needsReset = true;
+    state.close();
+  }
+
+  static function openOptions(state:PauseSubState):Void
+  {
+    funkin.ui.options.OptionsState.fromPlayState = true;
+    funkin.ui.options.OptionsState.disableMods = true;
+    FlxG.switchState(() -> new funkin.ui.options.OptionsState());
     state.close();
   }
 

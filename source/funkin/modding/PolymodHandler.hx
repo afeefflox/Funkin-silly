@@ -385,7 +385,9 @@ class PolymodHandler
 
     // Forcibly reload Polymod so it finds any new files.
     // TODO: Replace this with loadEnabledMods().
-    funkin.modding.PolymodHandler.loadAllMods();
+    if (Save.instance.enabledModIds.length > 0) PolymodHandler.loadEnabledMods();
+    else
+      PolymodHandler.loadNoMods();
 
     // Reload scripted classes so stages and modules will update.
     Polymod.registerAllScriptClasses();

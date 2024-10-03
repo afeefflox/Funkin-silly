@@ -6,11 +6,13 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import polymod.Polymod;
 import funkin.ui.options.OptionsState.Page;
+import funkin.save.Save;
+import funkin.audio.FunkinSound;
 
 class ModMenu extends Page
 {
   var grpMods:FlxTypedGroup<ModMenuItem>;
-  var enabledMods:Array<ModMetadata> = [];
+  var enabledMods:Array<String> = [];
   var detectedMods:Array<ModMetadata> = [];
 
   var curSelected:Int = 0;
@@ -30,26 +32,17 @@ class ModMenu extends Page
     if (FlxG.keys.justPressed.R) refreshModList();
 
     selections();
-
-    if (controls.UI_UP_P) selections(-1);
-    if (controls.UI_DOWN_P) selections(1);
-
-    if (FlxG.keys.justPressed.SPACE) grpMods.members[curSelected].modEnabled = !grpMods.members[curSelected].modEnabled;
-
-    if (FlxG.keys.justPressed.I && curSelected != 0)
+    if (controls.UI_UP_P || controls.UI_DOWN_P) selections(controls.UI_UP_P ? -1 : 1);
+    if (controls.ACCEPT)
     {
-      var oldOne = grpMods.members[curSelected - 1];
-      grpMods.members[curSelected - 1] = grpMods.members[curSelected];
-      grpMods.members[curSelected] = oldOne;
-      selections(-1);
-    }
+      enabledMods = Save.instance.enabledModIds;
+      grpMods.members[curSelected].modEnabled = !grpMods.members[curSelected].modEnabled;
+      if (grpMods.members[curSelected].modEnabled) enabledMods.push(grpMods.members[curSelected].idMod);
+      else
+        enabledMods.remove(grpMods.members[curSelected].idMod);
 
-    if (FlxG.keys.justPressed.K && curSelected < grpMods.members.length - 1)
-    {
-      var oldOne = grpMods.members[curSelected + 1];
-      grpMods.members[curSelected + 1] = grpMods.members[curSelected];
-      grpMods.members[curSelected] = oldOne;
-      selections(1);
+      Save.instance.enabledModIds = enabledMods;
+      FunkinSound.playOnce(Paths.sound(grpMods.members[curSelected].modEnabled ? 'confirmMenu' : 'cancelMenu'));
     }
 
     super.update(elapsed);
@@ -72,6 +65,8 @@ class ModMenu extends Page
         grpMods.members[txt].color = FlxColor.WHITE;
     }
 
+    if (curSelected != 0) FunkinSound.playOnce(Paths.sound('scrollMenu'), 0.4);
+
     organizeByY();
   }
 
@@ -90,9 +85,9 @@ class ModMenu extends Page
     for (index in 0...detectedMods.length)
     {
       var modMetadata:ModMetadata = detectedMods[index];
-      var modName:String = modMetadata.title;
-      var txt:ModMenuItem = new ModMenuItem(0, 10 + (40 * index), 0, modName, 32);
-      txt.text = modName;
+      var txt:ModMenuItem = new ModMenuItem(0, 10 + (40 * index), modMetadata.title);
+      txt.idMod = modMetadata.id;
+      txt.text = modMetadata.title;
       grpMods.add(txt);
     }
     #end
@@ -107,14 +102,14 @@ class ModMenu extends Page
   }
 }
 
-class ModMenuItem extends FlxText
+class ModMenuItem extends AtlasText
 {
   public var modEnabled:Bool = false;
-  public var daMod:String;
+  public var idMod:String;
 
-  public function new(x:Float, y:Float, w:Float, str:String, size:Int)
+  public function new(x:Float, y:Float, text:String)
   {
-    super(x, y, w, str, size);
+    super(x, y, text, funkin.ui.AtlasText.AtlasFont.BOLD);
   }
 
   override function update(elapsed:Float)

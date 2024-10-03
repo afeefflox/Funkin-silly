@@ -37,7 +37,7 @@ class StageRegistry extends BaseRegistry<Stage, StageData>
     // JsonParser does not take type parameters,
     // otherwise this function would be in BaseRegistry.
     var parser = new json2object.JsonParser<StageData>();
-    parser.ignoreUnknownVariables = false;
+    parser.ignoreUnknownVariables = true;
 
     switch (loadEntryFile(id))
     {
@@ -65,7 +65,7 @@ class StageRegistry extends BaseRegistry<Stage, StageData>
   public function parseEntryDataRaw(contents:String, ?fileName:String):Null<StageData>
   {
     var parser = new json2object.JsonParser<StageData>();
-    parser.ignoreUnknownVariables = false;
+    parser.ignoreUnknownVariables = true;
     parser.fromJson(contents, fileName);
 
     if (parser.errors.length > 0)

@@ -89,6 +89,7 @@ class Save
       options:
         {
           // Reasonable defaults.
+          ghostTapping: false,
           naughtyness: true,
           downscroll: false,
           flashingLights: true,
@@ -1144,6 +1145,12 @@ typedef SaveDataOptions =
    * @default `false`
    */
   var downscroll:Bool;
+
+  /**
+   * If enabled, you won't able miss it when you pressed a note
+   * @default `false`
+   */
+  var ghostTapping:Bool;
 
   /**
    * If disabled, flashing lights in the main menu and other areas will be less intense.

@@ -166,6 +166,11 @@ class PlayableCharacter implements IRegistryEntry<PlayerData>
     return 'PlayableCharacter($id)';
   }
 
+  public static function fetchData(id:String):Null<PlayerData>
+  {
+    return PlayerRegistry.instance.parseEntryDataWithMigration(id, PlayerRegistry.instance.fetchEntryVersion(id));
+  }
+
   /**
    * Retrieve and parse the JSON data for a playable character by ID.
    * @param id The ID of the character

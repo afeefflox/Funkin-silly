@@ -290,7 +290,7 @@ class SongRegistry extends BaseRegistry<Song, SongMetadata>
     variation = variation == null ? Constants.DEFAULT_VARIATION : variation;
 
     var parser = new json2object.JsonParser<SongMusicData>();
-    parser.ignoreUnknownVariables = false;
+    parser.ignoreUnknownVariables = true;
 
     switch (loadMusicDataFile(id, variation))
     {
@@ -311,7 +311,7 @@ class SongRegistry extends BaseRegistry<Song, SongMetadata>
   public function parseMusicDataRaw(contents:String, ?fileName:String = 'raw'):Null<SongMusicData>
   {
     var parser = new json2object.JsonParser<SongMusicData>();
-    parser.ignoreUnknownVariables = false;
+    parser.ignoreUnknownVariables = true;
     parser.fromJson(contents, fileName);
 
     if (parser.errors.length > 0)

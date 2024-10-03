@@ -4,7 +4,7 @@ import flixel.addons.display.FlxBackdrop;
 import flixel.addons.display.FlxGridOverlay;
 import flixel.FlxCamera;
 import flixel.FlxSprite;
-import flixel.FlxState;
+import funkin.ui.haxeui.HaxeUIState;
 import flixel.graphics.frames.FlxFrame;
 import flixel.group.FlxGroup;
 import flixel.math.FlxPoint;
@@ -39,7 +39,7 @@ import js.html.FileList;
 import sys.io.File;
 #end
 
-class DebugBoundingState extends FlxState
+class DebugBoundingState extends HaxeUIState
 {
   /*
     TODAY'S TO-DO
@@ -60,8 +60,6 @@ class DebugBoundingState extends FlxState
 
   var onionSkinChar:FlxSprite;
   var txtOffsetShit:FlxText;
-
-  var offsetEditorDialog:CollapsibleDialog;
   var offsetAnimationDropdown:DropDown;
 
   var haxeUIFocused(get, default):Bool = false;
@@ -80,24 +78,26 @@ class DebugBoundingState extends FlxState
     return Screen.instance.hasSolidComponentUnderPoint(hudMousePos.x, hudMousePos.y);
   }
 
+  public function new()
+  {
+    super(Paths.xml('ui/animation-editor/offset-editor-view'));
+  }
+
   override function create()
   {
-    Paths.setCurrentLevel('week1');
-
+    super.create();
     hudCam = new FlxCamera();
     hudCam.bgColor.alpha = 0;
+    FlxG.cameras.add(hudCam, false);
+
+    Paths.setCurrentLevel('week1');
 
     bg = new FlxBackdrop(FlxGridOverlay.createGrid(10, 10, FlxG.width, FlxG.height, true, 0xffe7e6e6, 0xffd9d5d5));
     add(bg);
 
     // we are setting this as the default draw camera only temporarily, to trick haxeui
-    FlxG.cameras.add(hudCam);
-
-    var str = Paths.xml('ui/animation-editor/offset-editor-view');
-    offsetEditorDialog = cast RuntimeComponentBuilder.fromAsset(str);
-
-    // offsetEditorDialog.findComponent("btnViewSpriteSheet").onClick = _ -> curView = SPRITESHEET;
-    var viewDropdown:DropDown = offsetEditorDialog.findComponent("swapper", DropDown);
+    component.cameras = [hudCam];
+    var viewDropdown:DropDown = findComponent("swapper", DropDown);
     viewDropdown.onChange = function(e:UIEvent) {
       trace(e.type);
       curView = cast e.data.curView;
@@ -105,25 +105,12 @@ class DebugBoundingState extends FlxState
       // trace(e.data);
     };
 
-    offsetAnimationDropdown = offsetEditorDialog.findComponent("animationDropdown", DropDown);
-
-    offsetEditorDialog.cameras = [hudCam];
-
-    add(offsetEditorDialog);
-
-    // Anchor to the right side by default
-    // offsetEditorDialog.x = FlxG.width - offsetEditorDialog.width;
-
-    // sets the default camera back to FlxG.camera, since we set it to hudCamera for haxeui stuf
-    FlxG.cameras.setDefaultDrawTarget(FlxG.camera, true);
-    FlxG.cameras.setDefaultDrawTarget(hudCam, false);
+    offsetAnimationDropdown = findComponent("animationDropdown", DropDown);
 
     initSpritesheetView();
     initOffsetView();
 
     Cursor.show();
-
-    super.create();
   }
 
   var bf:FlxSprite;
@@ -198,7 +185,7 @@ class DebugBoundingState extends FlxState
     });
     characters.sort(SortUtil.alphabetically);
 
-    var charDropdown:DropDown = offsetEditorDialog.findComponent('characterDropdown', DropDown);
+    var charDropdown:DropDown = findComponent('characterDropdown', DropDown);
     for (char in characters)
     {
       charDropdown.dataSource.add({text: char});
@@ -282,14 +269,14 @@ class DebugBoundingState extends FlxState
   {
     if (FlxG.keys.justPressed.ONE)
     {
-      var lv:DropDown = offsetEditorDialog.findComponent("swapper", DropDown);
+      var lv:DropDown = findComponent("swapper", DropDown);
       lv.selectedIndex = 0;
       curView = SPRITESHEET;
     }
 
     if (FlxG.keys.justReleased.TWO)
     {
-      var lv:DropDown = offsetEditorDialog.findComponent("swapper", DropDown);
+      var lv:DropDown = findComponent("swapper", DropDown);
       lv.selectedIndex = 1;
       curView = ANIMATIONS;
       if (swagChar != null)
@@ -321,9 +308,6 @@ class DebugBoundingState extends FlxState
 
     MouseUtil.mouseCamDrag();
     if (!haxeUIFocused) MouseUtil.mouseWheelZoom();
-
-    // bg.scale.x = FlxG.camera.zoom;
-    // bg.scale.y = FlxG.camera.zoom;
 
     bg.setGraphicSize(Std.int(bg.width / FlxG.camera.zoom));
 

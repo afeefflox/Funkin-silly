@@ -32,7 +32,7 @@ class FreeplayStyleRegistry extends BaseRegistry<FreeplayStyle, FreeplayStyleDat
     // JsonParser does not take type parameters,
     // otherwise this function would be in BaseRegistry.
     var parser:json2object.JsonParser<FreeplayStyleData> = new json2object.JsonParser<FreeplayStyleData>();
-    parser.ignoreUnknownVariables = false;
+    parser.ignoreUnknownVariables = true;
 
     switch (loadEntryFile(id))
     {
@@ -61,7 +61,7 @@ class FreeplayStyleRegistry extends BaseRegistry<FreeplayStyle, FreeplayStyleDat
   public function parseEntryDataRaw(contents:String, ?fileName:String):Null<FreeplayStyleData>
   {
     var parser:json2object.JsonParser<FreeplayStyleData> = new json2object.JsonParser<FreeplayStyleData>();
-    parser.ignoreUnknownVariables = false;
+    parser.ignoreUnknownVariables = true;
     parser.fromJson(contents, fileName);
 
     if (parser.errors.length > 0)

@@ -239,7 +239,7 @@ class NGio
     NG.core.calls.event.logEvent(event).send();
     trace('should have logged: ' + event);
     #else
-    #if FEATURE_DEBUG_FUNCTIONS
+    #if debug
     trace('event:$event - not logged, missing NG.io lib');
     #end
     #end
@@ -254,7 +254,7 @@ class NGio
       if (!medal.unlocked) medal.sendUnlock();
     }
     #else
-    #if FEATURE_DEBUG_FUNCTIONS
+    #if debug
     trace('medal:$id - not unlocked, missing NG.io lib');
     #end
     #end
@@ -278,7 +278,7 @@ class NGio
       }
     }
     #else
-    #if FEATURE_DEBUG_FUNCTIONS
+    #if debug
     trace('Song:$song, Score:$score - not posted, missing NG.io lib');
     #end
     #end

@@ -139,7 +139,7 @@ class PlayerRegistry extends BaseRegistry<PlayableCharacter, PlayerData>
     // JsonParser does not take type parameters,
     // otherwise this function would be in BaseRegistry.
     var parser = new json2object.JsonParser<PlayerData>();
-    parser.ignoreUnknownVariables = false;
+    parser.ignoreUnknownVariables = true;
 
     switch (loadEntryFile(id))
     {
@@ -167,7 +167,7 @@ class PlayerRegistry extends BaseRegistry<PlayableCharacter, PlayerData>
   public function parseEntryDataRaw(contents:String, ?fileName:String):Null<PlayerData>
   {
     var parser = new json2object.JsonParser<PlayerData>();
-    parser.ignoreUnknownVariables = false;
+    parser.ignoreUnknownVariables = true;
     parser.fromJson(contents, fileName);
 
     if (parser.errors.length > 0)

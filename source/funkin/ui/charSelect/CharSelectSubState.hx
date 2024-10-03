@@ -88,6 +88,8 @@ class CharSelectSubState extends MusicBeatSubState
   var bopInfo:FramesJSFLInfo;
   var blackScreen:FunkinSprite;
 
+  public static var initialized:Bool = false;
+
   public function new()
   {
     super();
@@ -401,7 +403,7 @@ class CharSelectSubState extends MusicBeatSubState
     FlxG.sound.defaultSoundGroup.add(introSound);
     FlxG.sound.list.add(introSound);
 
-    openSubState(new IntroSubState());
+    if (!initialized) openSubState(new IntroSubState());
     subStateClosed.addOnce((_) -> {
       remove(blackScreen);
       if (!Save.instance.oldChar)

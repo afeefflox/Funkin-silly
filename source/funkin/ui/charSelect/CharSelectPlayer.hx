@@ -56,23 +56,15 @@ class CharSelectPlayer extends FlxAtlasSprite implements IBPMSyncedScriptedClass
   {
     switch (str)
     {
-      case "bf":
-        x = 0;
-        y = 0;
-      case "pico":
-        x = 0;
-        y = 0;
+      default:
+        x = y = 0;
       case "random":
     }
   }
 
   public function switchChar(str:String)
   {
-    switch str
-    {
-      default:
-        loadAtlas(Paths.animateAtlas("charSelect/" + str + "Chill"));
-    }
+    loadAtlas(Paths.animateAtlas("charSelect/" + str + "Chill"));
 
     playAnimation("slidein", true, false, false);
 

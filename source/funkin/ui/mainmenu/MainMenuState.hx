@@ -45,6 +45,7 @@ class MainMenuState extends MusicBeatState
   var overrideMusic:Bool = false;
 
   static var rememberedSelectedIndex:Int = 0;
+  public static var reloadMod:Bool = false;
 
   public function new(?_overrideMusic:Bool = false)
   {
@@ -132,6 +133,8 @@ class MainMenuState extends MusicBeatState
     #end
 
     createMenuItem('options', 'mainmenu/options', function() {
+      funkin.ui.options.OptionsState.disableMods = false;
+      funkin.ui.options.OptionsState.fromPlayState = false;
       startExitState(() -> new funkin.ui.options.OptionsState());
     });
 

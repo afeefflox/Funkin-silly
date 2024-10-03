@@ -37,14 +37,8 @@ class Nametag extends FlxSprite
     shaderEffect();
 
     new FlxTimer().start(4 / 30, _ -> {
-      var path:String = str;
-      switch str
-      {
-        case "bf":
-          path = "boyfriend";
-      }
+      loadGraphic(Paths.image('charSelect/' + str + "Nametag"));
 
-      loadGraphic(Paths.image('charSelect/' + path + "Nametag"));
       updateHitbox();
       scale.x = scale.y = 0.77;
 

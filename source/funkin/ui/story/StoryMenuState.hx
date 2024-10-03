@@ -113,7 +113,7 @@ class StoryMenuState extends MusicBeatState
   {
     super();
 
-    if (stickers?.members != null)
+    if (stickers != null)
     {
       stickerSubState = stickers;
     }
@@ -216,7 +216,7 @@ class StoryMenuState extends MusicBeatState
     changeLevel();
     refresh();
 
-    #if FEATURE_DISCORD_RPC
+    #if discord_rpc
     // Updating Discord Rich Presence
     DiscordClient.changePresence('In the Menus', null);
     #end
@@ -336,22 +336,6 @@ class StoryMenuState extends MusicBeatState
           changeDifficulty(0);
         }
 
-        #if !html5
-        if (FlxG.mouse.wheel != 0)
-        {
-          changeLevel(-Math.round(FlxG.mouse.wheel));
-        }
-        #else
-        if (FlxG.mouse.wheel < 0)
-        {
-          changeLevel(-Math.round(FlxG.mouse.wheel / 8));
-        }
-        else if (FlxG.mouse.wheel > 0)
-        {
-          changeLevel(-Math.round(FlxG.mouse.wheel / 8));
-        }
-        #end
-
         // TODO: Querying UI_RIGHT_P (justPressed) after UI_RIGHT always returns false. Fix it!
         if (controls.UI_RIGHT_P)
         {
@@ -390,9 +374,9 @@ class StoryMenuState extends MusicBeatState
 
     if (controls.BACK && !exitingMenu && !selectedLevel)
     {
+      FunkinSound.playOnce(Paths.sound('cancelMenu'));
       exitingMenu = true;
       FlxG.switchState(() -> new MainMenuState());
-      FunkinSound.playOnce(Paths.sound('cancelMenu'));
     }
   }
 

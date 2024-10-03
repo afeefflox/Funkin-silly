@@ -54,11 +54,8 @@ class DebugMenuSubState extends MusicBeatSubState
 
     // Create each menu item.
     // Call onMenuChange when the first item is created to move the camera .
-    #if FEATURE_CHART_EDITOR
     onMenuChange(createItem("CHART EDITOR", openChartEditor));
-    #end
     // createItem("Input Offset Testing", openInputOffsetTesting);
-    createItem("CHARACTER SELECT", openCharSelect, true);
     createItem("ANIMATION EDITOR", openAnimationEditor);
     // createItem("STAGE EDITOR", openStageEditor);
     // createItem("TEST STICKERS", testStickers);
@@ -103,11 +100,6 @@ class DebugMenuSubState extends MusicBeatSubState
   {
     openSubState(new funkin.ui.debug.latency.LatencyState());
     trace('Input Offset Testing');
-  }
-
-  function openCharSelect()
-  {
-    FlxG.switchState(new funkin.ui.charSelect.CharSelectSubState());
   }
 
   function openAnimationEditor()

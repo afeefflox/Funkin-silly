@@ -510,6 +510,11 @@ class Stage extends FlxSpriteGroup implements IPlayStateScriptedClass implements
     return this.characters.get(id);
   }
 
+  public function existsCharacter(id:String)
+  {
+    return this.characters.exists(id);
+  }
+
   /**
    * Retrieve the Boyfriend character.
    * @param pop If true, the character will be removed from the stage as well.
@@ -607,6 +612,11 @@ class Stage extends FlxSpriteGroup implements IPlayStateScriptedClass implements
   public function getNamedProp(name:String):StageProp
   {
     return this.namedProps.get(name);
+  }
+
+  public function existsNamedProp(name:String)
+  {
+    return this.namedProps.exists(name);
   }
 
   /**

@@ -84,6 +84,7 @@ import funkin.ui.debug.charting.components.ChartEditorNotePreview;
 import funkin.ui.debug.charting.components.ChartEditorNoteSprite;
 import funkin.ui.debug.charting.components.ChartEditorPlaybarHead;
 import funkin.ui.debug.charting.components.ChartEditorSelectionSquareSprite;
+import funkin.ui.debug.charting.components.AttachedFlxText;
 import funkin.ui.debug.charting.handlers.ChartEditorShortcutHandler;
 import funkin.ui.debug.charting.toolboxes.ChartEditorBaseToolbox;
 import funkin.ui.debug.charting.toolboxes.ChartEditorDifficultyToolbox;
@@ -240,6 +241,8 @@ class ChartEditorState extends UIState // UIState derives from MusicBeatState
   public static final SPECTROGRAM_COLOR:FlxColor = 0xFFFF0000;
   public static final PLAYHEAD_COLOR:FlxColor = 0xC0BD0231;
 
+  var noteParamsToPlace:Array<NoteParamData> = [];
+
   // Timings
 
   /**
@@ -283,21 +286,6 @@ class ChartEditorState extends UIState // UIState derives from MusicBeatState
    * The duration of the welcome music fade in.
    */
   public static final WELCOME_MUSIC_FADE_IN_DURATION:Float = 10.0;
-
-  /**
-   * A map of the keys for every live input style.
-   */
-  public static final LIVE_INPUT_KEYS:Map<ChartEditorLiveInputStyle, Array<FlxKey>> = [
-    NumberKeys => [
-      FIVE, SIX, SEVEN, EIGHT,
-       ONE, TWO, THREE,  FOUR
-    ],
-    WASDKeys => [
-      LEFT, DOWN, UP, RIGHT,
-         A,    S,  W,     D
-    ],
-    None => []
-  ];
 
   /**
    * INSTANCE DATA
@@ -554,11 +542,6 @@ class ChartEditorState extends UIState // UIState derives from MusicBeatState
    * The note kind to use for notes being placed in the chart. Defaults to `null`.
    */
   var noteKindToPlace:Null<String> = null;
-
-  /**
-   * The note params to use for notes being placed in the chart. Defaults to `[]`.
-   */
-  var noteParamsToPlace:Array<NoteParamData> = [];
 
   /**
    * The event type to use for events being placed in the chart. Defaults to `''`.
@@ -1423,9 +1406,7 @@ class ChartEditorState extends UIState // UIState derives from MusicBeatState
 
   function get_currentSongNoteStyle():String
   {
-    if (currentSongMetadata.playData.noteStyle == null
-      || currentSongMetadata.playData.noteStyle == ''
-      || currentSongMetadata.playData.noteStyle == 'item')
+    if (currentSongMetadata.playData.noteStyle == null)
     {
       // Initialize to the default value if not set.
       currentSongMetadata.playData.noteStyle = Constants.DEFAULT_NOTE_STYLE;
@@ -2121,6 +2102,8 @@ class ChartEditorState extends UIState // UIState derives from MusicBeatState
    */
   var renderedNotes:FlxTypedSpriteGroup<ChartEditorNoteSprite> = new FlxTypedSpriteGroup<ChartEditorNoteSprite>();
 
+  var renderedNoteKinds:FlxTypedSpriteGroup<AttachedFlxText> = new FlxTypedSpriteGroup<AttachedFlxText>();
+
   /**
    * The sprite group containing the hold note graphics.
    * Only displays a subset of the data from `currentSongChartNoteData`,
@@ -2460,7 +2443,7 @@ class ChartEditorState extends UIState // UIState derives from MusicBeatState
 
     gridGhostNote = new ChartEditorNoteSprite(this);
     gridGhostNote.alpha = 0.6;
-    gridGhostNote.noteData = new SongNoteData(0, 0, 0, "", []);
+    gridGhostNote.noteData = new SongNoteData(0, 0, 0, "");
     gridGhostNote.visible = false;
     add(gridGhostNote);
     gridGhostNote.zIndex = 11;
@@ -2667,6 +2650,10 @@ class ChartEditorState extends UIState // UIState derives from MusicBeatState
     renderedNotes.setPosition(gridTiledSprite.x, gridTiledSprite.y);
     add(renderedNotes);
     renderedNotes.zIndex = 25;
+
+    renderedNoteKinds.setPosition(gridTiledSprite.x, gridTiledSprite.y);
+    add(renderedNoteKinds);
+    renderedNoteKinds.zIndex = 25;
 
     renderedEvents.setPosition(gridTiledSprite.x, gridTiledSprite.y);
     add(renderedEvents);
@@ -3327,7 +3314,7 @@ class ChartEditorState extends UIState // UIState derives from MusicBeatState
     handleTestKeybinds();
     handleHelpKeybinds();
 
-    #if FEATURE_DEBUG_FUNCTIONS
+    #if (debug || FORCE_DEBUG_VERSION)
     handleQuickWatch();
     #end
 
@@ -3602,8 +3589,14 @@ class ChartEditorState extends UIState // UIState derives from MusicBeatState
         // Get a note sprite from the pool.
         // If we can reuse a deleted note, do so.
         // If a new note is needed, call buildNoteSprite.
+        var daText:AttachedFlxText = renderedNoteKinds.recycle(() -> new AttachedFlxText(0, 0, 100, noteData.kind, 24));
+        daText.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+        daText.xAdd = -32;
+        daText.yAdd = 6;
+        daText.borderSize = 1;
+
         var noteSprite:ChartEditorNoteSprite = renderedNotes.recycle(() -> new ChartEditorNoteSprite(this));
-        // trace('Creating new Note... (${renderedNotes.members.length})');
+
         noteSprite.parentState = this;
 
         // The note sprite handles animation playback and positioning.
@@ -3611,6 +3604,7 @@ class ChartEditorState extends UIState // UIState derives from MusicBeatState
         noteSprite.noteStyle = NoteKindManager.getNoteStyleId(noteData.kind, currentSongNoteStyle) ?? currentSongNoteStyle;
         noteSprite.overrideStepTime = null;
         noteSprite.overrideData = null;
+        daText.sprTracker = noteSprite;
 
         // Setting note data resets the position relative to the group!
         // If we don't update the note position AFTER setting the note data, the note will be rendered offscreen at y=5000.
@@ -5161,10 +5155,46 @@ class ChartEditorState extends UIState // UIState derives from MusicBeatState
   function handlePlayhead():Void
   {
     // Place notes at the playhead with the keyboard.
-    for (note => key in LIVE_INPUT_KEYS[currentLiveInputStyle])
+    switch (currentLiveInputStyle)
     {
-      if (FlxG.keys.checkStatus(key, JUST_PRESSED)) placeNoteAtPlayhead(note)
-      else if (FlxG.keys.checkStatus(key, JUST_RELEASED)) finishPlaceNoteAtPlayhead(note);
+      case ChartEditorLiveInputStyle.WASDKeys:
+        if (FlxG.keys.justPressed.A) placeNoteAtPlayhead(4);
+        if (FlxG.keys.justReleased.A) finishPlaceNoteAtPlayhead(4);
+        if (FlxG.keys.justPressed.S) placeNoteAtPlayhead(5);
+        if (FlxG.keys.justReleased.S) finishPlaceNoteAtPlayhead(5);
+        if (FlxG.keys.justPressed.W) placeNoteAtPlayhead(6);
+        if (FlxG.keys.justReleased.W) finishPlaceNoteAtPlayhead(6);
+        if (FlxG.keys.justPressed.D) placeNoteAtPlayhead(7);
+        if (FlxG.keys.justReleased.D) finishPlaceNoteAtPlayhead(7);
+
+        if (FlxG.keys.justPressed.LEFT) placeNoteAtPlayhead(0);
+        if (FlxG.keys.justReleased.LEFT) finishPlaceNoteAtPlayhead(0);
+        if (FlxG.keys.justPressed.DOWN) placeNoteAtPlayhead(1);
+        if (FlxG.keys.justReleased.DOWN) finishPlaceNoteAtPlayhead(1);
+        if (FlxG.keys.justPressed.UP) placeNoteAtPlayhead(2);
+        if (FlxG.keys.justReleased.UP) finishPlaceNoteAtPlayhead(2);
+        if (FlxG.keys.justPressed.RIGHT) placeNoteAtPlayhead(3);
+        if (FlxG.keys.justReleased.RIGHT) finishPlaceNoteAtPlayhead(3);
+      case ChartEditorLiveInputStyle.NumberKeys:
+        // Flipped because Dad is on the left but represents data 0-3.
+        if (FlxG.keys.justPressed.ONE) placeNoteAtPlayhead(4);
+        if (FlxG.keys.justReleased.ONE) finishPlaceNoteAtPlayhead(4);
+        if (FlxG.keys.justPressed.TWO) placeNoteAtPlayhead(5);
+        if (FlxG.keys.justReleased.TWO) finishPlaceNoteAtPlayhead(5);
+        if (FlxG.keys.justPressed.THREE) placeNoteAtPlayhead(6);
+        if (FlxG.keys.justReleased.THREE) finishPlaceNoteAtPlayhead(6);
+        if (FlxG.keys.justPressed.FOUR) placeNoteAtPlayhead(7);
+        if (FlxG.keys.justReleased.FOUR) finishPlaceNoteAtPlayhead(7);
+
+        if (FlxG.keys.justPressed.FIVE) placeNoteAtPlayhead(0);
+        if (FlxG.keys.justReleased.FIVE) finishPlaceNoteAtPlayhead(0);
+        if (FlxG.keys.justPressed.SIX) placeNoteAtPlayhead(1);
+        if (FlxG.keys.justPressed.SEVEN) placeNoteAtPlayhead(2);
+        if (FlxG.keys.justReleased.SEVEN) finishPlaceNoteAtPlayhead(2);
+        if (FlxG.keys.justPressed.EIGHT) placeNoteAtPlayhead(3);
+        if (FlxG.keys.justReleased.EIGHT) finishPlaceNoteAtPlayhead(3);
+      case ChartEditorLiveInputStyle.None:
+        // Do nothing.
     }
 
     // Place events at playhead.
@@ -5651,6 +5681,7 @@ class ChartEditorState extends UIState // UIState derives from MusicBeatState
     FlxG.watch.addQuick('scrollPosInPixels', scrollPositionInPixels);
     FlxG.watch.addQuick('playheadPosInPixels', playheadPositionInPixels);
 
+    FlxG.watch.addQuick("NoteKindsRendered", renderedNoteKinds?.members?.length);
     FlxG.watch.addQuick("tapNotesRendered", renderedNotes?.members?.length);
     FlxG.watch.addQuick("holdNotesRendered", renderedHoldNotes?.members?.length);
     FlxG.watch.addQuick("eventsRendered", renderedEvents?.members?.length);
@@ -5699,21 +5730,21 @@ class ChartEditorState extends UIState // UIState derives from MusicBeatState
     // TODO: Rework asset system so we can remove this jank.
     switch (currentSongStage)
     {
-      case 'mainStage' | 'mainStageErect':
+      case 'mainStage':
         PlayStatePlaylist.campaignId = 'week1';
-      case 'spookyMansion' | 'spookyMansionErect':
+      case 'spookyMansion':
         PlayStatePlaylist.campaignId = 'week2';
-      case 'phillyTrain' | 'phillyTrainErect':
+      case 'phillyTrain':
         PlayStatePlaylist.campaignId = 'week3';
-      case 'limoRide' | 'limoRideErect':
+      case 'limoRide':
         PlayStatePlaylist.campaignId = 'week4';
-      case 'mallXmas' | 'mallXmasErect' | 'mallEvil':
+      case 'mallXmas' | 'mallEvil':
         PlayStatePlaylist.campaignId = 'week5';
       case 'school' | 'schoolEvil':
         PlayStatePlaylist.campaignId = 'week6';
       case 'tankmanBattlefield':
         PlayStatePlaylist.campaignId = 'week7';
-      case 'phillyStreets' | 'phillyStreetsErect' | 'phillyBlazin' | 'phillyBlazin2':
+      case 'phillyStreets' | 'phillyBlazin' | 'phillyBlazin2':
         PlayStatePlaylist.campaignId = 'weekend1';
     }
     Paths.setCurrentLevel(PlayStatePlaylist.campaignId);

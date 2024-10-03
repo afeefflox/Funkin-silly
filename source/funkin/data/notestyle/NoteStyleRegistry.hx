@@ -42,7 +42,7 @@ class NoteStyleRegistry extends BaseRegistry<NoteStyle, NoteStyleData>
     // JsonParser does not take type parameters,
     // otherwise this function would be in BaseRegistry.
     var parser = new json2object.JsonParser<NoteStyleData>();
-    parser.ignoreUnknownVariables = false;
+    parser.ignoreUnknownVariables = true;
 
     switch (loadEntryFile(id))
     {
@@ -70,7 +70,7 @@ class NoteStyleRegistry extends BaseRegistry<NoteStyle, NoteStyleData>
   public function parseEntryDataRaw(contents:String, ?fileName:String):Null<NoteStyleData>
   {
     var parser = new json2object.JsonParser<NoteStyleData>();
-    parser.ignoreUnknownVariables = false;
+    parser.ignoreUnknownVariables = true;
     parser.fromJson(contents, fileName);
 
     if (parser.errors.length > 0)

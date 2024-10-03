@@ -13,12 +13,16 @@ import funkin.graphics.shaders.HSVShader;
 import funkin.util.WindowUtil;
 import funkin.audio.FunkinSound;
 import funkin.input.Controls;
+import funkin.ui.transition.LoadingState;
 
 class OptionsState extends MusicBeatState
 {
   var pages = new Map<PageName, Page>();
   var currentName:PageName = Options;
   var currentPage(get, never):Page;
+
+  public static var disableMods:Bool = false;
+  public static var fromPlayState:Bool = false;
 
   inline function get_currentPage():Page
     return pages[currentName];
@@ -41,6 +45,7 @@ class OptionsState extends MusicBeatState
     add(menuBG);
 
     var options = addPage(Options, new OptionsMenu());
+    var mods = addPage(Mods, new ModMenu());
     var preferences = addPage(Preferences, new PreferencesMenu());
     var controls = addPage(Controls, new ControlsMenu());
 
@@ -48,6 +53,7 @@ class OptionsState extends MusicBeatState
     {
       options.onExit.add(exitToMainMenu);
       controls.onExit.add(exitControls);
+      mods.onExit.add(exitToTitleState);
       preferences.onExit.add(switchPage.bind(Options));
     }
     else
@@ -105,7 +111,17 @@ class OptionsState extends MusicBeatState
   {
     currentPage.enabled = false;
     // TODO: Animate this transition?
-    FlxG.switchState(() -> new MainMenuState());
+    if (fromPlayState) LoadingState.loadPlayState(funkin.play.PlayState.lastParams);
+    else
+      FlxG.switchState(() -> new MainMenuState());
+  }
+
+  function exitToTitleState()
+  {
+    currentPage.enabled = false;
+    // TODO: Animate this transition?
+    funkin.modding.PolymodHandler.forceReloadAssets();
+    FlxG.switchState(() -> new funkin.ui.title.TitleState());
   }
 }
 
@@ -184,6 +200,7 @@ class OptionsMenu extends Page
     add(items = new TextMenuList());
     createItem("PREFERENCES", function() switchPage(Preferences));
     createItem("CONTROLS", function() switchPage(Controls));
+    if (!OptionsState.disableMods) createItem("MODS", function() switchPage(Mods));
     createItem("INPUT OFFSETS", function() {
       FlxG.state.openSubState(new LatencyState());
     });

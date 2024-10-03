@@ -393,14 +393,7 @@ class Strumline extends FlxSpriteGroup
 
       if (conductorInUse.songPosition > holdNote.strumTime && holdNote.hitNote && !holdNote.missedNote)
       {
-        if (isPlayer && !isKeyHeld(holdNote.noteDirection))
-        {
-          // Stopped pressing the hold note.
-          playStatic(holdNote.noteDirection);
-          holdNote.missedNote = true;
-          holdNote.visible = true;
-          holdNote.alpha = 0.0; // Completely hide the dropped hold note.
-        }
+        if (isPlayer && !isKeyHeld(holdNote.noteDirection)) playStatic(holdNote.noteDirection);
       }
 
       var renderWindowEnd = holdNote.strumTime + holdNote.fullSustainLength + Constants.HIT_WINDOW_MS + RENDER_DISTANCE_MS / 8;
@@ -423,16 +416,7 @@ class Strumline extends FlxSpriteGroup
           playStatic(holdNote.noteDirection);
         }
 
-        if (holdNote.cover != null && isPlayer)
-        {
-          holdNote.cover.playEnd();
-        }
-        else if (holdNote.cover != null)
-        {
-          // *lightning* *zap* *crackle*
-          holdNote.cover.visible = false;
-          holdNote.cover.kill();
-        }
+        holdNote.cover.playEnd();
 
         holdNote.visible = false;
         holdNote.kill();
